@@ -1,5 +1,7 @@
-package datamodels;
+package com.chimnani.jaish.datamodels;
+import javafx.beans.Observable;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -16,7 +18,7 @@ public class TodoData {
     private static TodoData instance = new TodoData();
     private static String filename = "TodoListItems.txt";
 
-    private List<TodoItem> todoItems;
+    private ObservableList<TodoItem> todoItems;
     private DateTimeFormatter formatter;
 
     public static TodoData getInstance() {
@@ -27,24 +29,27 @@ public class TodoData {
         formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
     }
 
-    public List<TodoItem> getTodoItems() {
+    public ObservableList<TodoItem> getTodoItems() {
         return todoItems;
     }
 
-    //    public void setTodoItems(List<TodoItem> todoItems) {
-//        this.todoItems = todoItems;
-//    }
-//
+        public void setTodoItems(ObservableList<TodoItem> todoItems) {
+        this.todoItems = todoItems;
+    }
+
     public void loadTodoItems() throws IOException {
 
+        System.out.println("opening file");
         todoItems = FXCollections.observableArrayList();
         Path path = Paths.get(filename);
+        System.out.println("writing ");
         BufferedReader br = Files.newBufferedReader(path);
 
         String input;
 
         try {
             while ((input = br.readLine()) != null) {
+                System.out.println("splitting");
                 String[] itemPieces = input.split("\t");
 
                 String shortDescription = itemPieces[0];
@@ -54,6 +59,7 @@ public class TodoData {
                 LocalDate date = LocalDate.parse(dateString, formatter);
                 TodoItem todoItem = new TodoItem(shortDescription, details, date);
                 todoItems.add(todoItem);
+                System.out.println("loading"+todoItem);
             }
 
         } finally {
@@ -65,12 +71,15 @@ public class TodoData {
 
     public void storeTodoItems() throws IOException {
 
+        System.out.println("opening file");
         Path path = Paths.get(filename);
         BufferedWriter bw = Files.newBufferedWriter(path);
+        System.out.println("writing in file");
         try {
             Iterator<TodoItem> iter = todoItems.iterator();
             while(iter.hasNext()) {
                 TodoItem item = iter.next();
+                System.out.println("storing item");
                 bw.write(String.format("%s\t%s\t%s",
                         item.getShortDescription(),
                         item.getDetails(),
@@ -91,4 +100,9 @@ public class TodoData {
 
 
 
-    }}
+    }
+
+    public void addTodoItem(TodoItem todoItem) {
+        todoItems.add(todoItem);
+    }
+}

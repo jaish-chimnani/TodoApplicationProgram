@@ -1,19 +1,19 @@
 package com.chimnani.jaish;
 
-import datamodels.TodoData;
-import datamodels.TodoItem;
+import com.chimnani.jaish.datamodels.TodoData;
+import com.chimnani.jaish.datamodels.TodoItem;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
-import javafx.scene.control.SelectionMode;
-import javafx.scene.control.TextArea;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.control.*;
+import javafx.scene.layout.BorderPane;
 
-import java.time.LocalDate;
-import java.time.Month;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class Controller {
     private List<TodoItem> todoList;
@@ -24,23 +24,45 @@ public class Controller {
     private Label label1;
     @FXML
     private TextArea textArea1;
+
+    @FXML
+    private BorderPane mainWindowPane;
+
+    @FXML
+    public void showNewItemDialog () {
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.initOwner(mainWindowPane.getScene().getWindow());
+        FXMLLoader fxmlLoader=new FXMLLoader();
+        fxmlLoader.setLocation(getClass().getResource("todoItemDialog.fxml"));
+        try{
+//            Parent root= FXMLLoader.load(getClass().getResource("todoItemDialog.fxml"));
+            dialog.getDialogPane().setContent(fxmlLoader.load());
+        }catch (IOException exception){
+            exception.printStackTrace();
+            return;
+        }
+
+        dialog.getDialogPane().getButtonTypes().add(ButtonType.OK);
+        dialog.getDialogPane().getButtonTypes().add(ButtonType.CANCEL);
+        Optional<ButtonType> result=dialog.showAndWait();
+        if (result.isPresent() && result.get()==ButtonType.OK){
+            DialogController dialogController=fxmlLoader.getController();
+            TodoItem newItem=dialogController.processResult();
+            todoListView.getItems().setAll(TodoData.getInstance().getTodoItems());
+            todoListView.getSelectionModel().select(newItem);
+        }
+        if (result.isPresent() && result.get()==ButtonType.CANCEL){
+            
+        }
+
+    }
     @FXML
     public void initialize() {
-//        TodoItem item1=new TodoItem("Birthday","aalok kumar yadav", LocalDate.of(2021, Month.OCTOBER,02));
-//        TodoItem item2=new TodoItem("Birthday","Karan Mishra", LocalDate.of(2021, Month.MAY,15));
-//        TodoItem item3=new TodoItem("Birthday","himanshu", LocalDate.of(2021, Month.OCTOBER,22));
-//        TodoItem item4=new TodoItem("Birthday","Jaish Chimnani", LocalDate.of(2021, Month.SEPTEMBER,9));
-//
-//        this.todoList=new ArrayList<>();
-//        todoList.add(item1);
-//        todoList.add(item2);
-//        todoList.add(item3);
-//        todoList.add(item4);
-
+        this.todoList = new ArrayList<>();
         todoListView.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<TodoItem>() {
             @Override
             public void changed(ObservableValue<? extends TodoItem> observableValue, TodoItem todoItem, TodoItem t1) {
-                if (t1!=null){
+                if (t1 != null) {
                     TodoItem item = todoListView.getSelectionModel().getSelectedItem();
                     textArea1.setText(item.getDetails());
                     label1.setText(item.getDeadline().toString());
@@ -54,11 +76,23 @@ public class Controller {
     }
 
     @FXML
-    public void handleClicklistner(){
-        TodoItem todoItem=todoListView.getSelectionModel().getSelectedItem();
-        if (todoItem!=null){
+    public void handleClicklistner() {
+        TodoItem todoItem = todoListView.getSelectionModel().getSelectedItem();
+        if (todoItem != null) {
             textArea1.setText(todoItem.getDetails());
-            label1.setText("DEADLINE : "+todoItem.getDeadline().toString());
+            label1.setText("DEADLINE : " + todoItem.getDeadline().toString());
         }
+    }
+    @FXML
+    public void save(){
+        try{
+            TodoData.getInstance().storeTodoItems();
+        }catch (IOException e){
+
+        }
+    }
+    @FXML
+    public void exit(){
+        System.exit(0);
     }
 }

@@ -9,15 +9,16 @@
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.SeparatorMenuItem?>
-<BorderPane fx:controller="com.chimnani.jaish.Controller"
+<BorderPane fx:id="mainWindowPane" fx:controller="com.chimnani.jaish.Controller"
             xmlns:fx="http://javafx.com/fxml">
     <top>
         <MenuBar>
             <Menu text="File">
                 <items>
-                    <MenuItem text="New..."/>
+                    <MenuItem text="New..." onAction="#showNewItemDialog"/>
                     <SeparatorMenuItem/>
-                    <MenuItem text="Exit"/>
+                    <MenuItem text="Save" onAction="#save" />
+                    <MenuItem text="Exit" onAction="#exit" />
                 </items>
             </Menu>
         </MenuBar>
@@ -29,7 +30,7 @@
     </left>
     <center>
         <VBox style="-fx-background-color: white">
-            <TextArea fx:id="textArea1" VBox.vgrow="ALWAYS"/>
+            <TextArea fx:id="textArea1" VBox.vgrow="ALWAYS" wrapText="true"/>
             <HBox>
                 <Label text="Due: " style="-fx-background-color: white">
                     <font>

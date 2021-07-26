@@ -1,4 +1,4 @@
-package datamodels;
+package com.chimnani.jaish.datamodels;
 
 import java.time.LocalDate;
 
