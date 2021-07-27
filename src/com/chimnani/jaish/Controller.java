@@ -4,13 +4,18 @@ import com.chimnani.jaish.datamodels.TodoData;
 import com.chimnani.jaish.datamodels.TodoItem;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.paint.Color;
+import javafx.util.Callback;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -20,6 +25,8 @@ public class Controller {
     @FXML
     private ListView<TodoItem> todoListView;
 
+    @FXML
+    private ContextMenu contextMenu;
     @FXML
     private Label label1;
     @FXML
@@ -58,6 +65,17 @@ public class Controller {
     }
     @FXML
     public void initialize() {
+
+        contextMenu=new ContextMenu();
+        MenuItem deleteMenuItem=new MenuItem("Delete");
+        deleteMenuItem.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                TodoItem todoItem=todoListView.getSelectionModel().getSelectedItem();
+                deleteItem(todoItem);
+            }
+        });
+        contextMenu.getItems().addAll(deleteMenuItem);
         this.todoList = new ArrayList<>();
         todoListView.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<TodoItem>() {
             @Override
@@ -73,6 +91,51 @@ public class Controller {
         todoListView.getItems().addAll(TodoData.getInstance().getTodoItems());
         todoListView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
         todoListView.getSelectionModel().selectFirst(); // when the program will be initialized the first option will be of default type! ty.
+
+        todoListView.setCellFactory(new Callback<ListView<TodoItem>, ListCell<TodoItem>>() {
+            @Override
+            public ListCell<TodoItem> call(ListView<TodoItem> todoItemListView) {
+                ListCell<TodoItem> cell=new ListCell<>(){
+                    @Override
+                    protected void updateItem(TodoItem todoItem, boolean empty) {
+                        super.updateItem(todoItem, empty);
+                        if(empty){
+                            setText(null);
+                        }else{
+
+                            setText(todoItem.getShortDescription());
+                            if(todoItem.getDeadline().isBefore(LocalDate.now())){
+                                setTextFill(Color.RED);
+                            }else if(todoItem.getDeadline().equals(LocalDate.now().plusDays(1))){
+                                setTextFill(Color.ORANGE);
+                            }
+                        }
+                    }
+                };
+                cell.emptyProperty().addListener(
+                        (obs,wasEmpty,isNowEmpty)->{
+                            if (isNowEmpty){
+                                cell.setContextMenu(null);
+                            }else {
+                                cell.setContextMenu(contextMenu);
+                            }
+                        }
+                );
+                    return cell;
+            };
+        });
+    }
+
+    private void deleteItem(TodoItem todoItem) {
+        Alert alert=new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Delete Selected Item");
+        alert.setHeaderText("Delete Item: "+todoItem.getShortDescription());
+        alert.setContentText("Click OK to confirm");
+        Optional<ButtonType> result=alert.showAndWait();
+        if(result.isPresent() && result.get()==ButtonType.OK){
+            TodoData.getInstance().deleteTodoItem(todoItem);
+        }
+
     }
 
     @FXML
@@ -95,4 +158,6 @@ public class Controller {
     public void exit(){
         System.exit(0);
     }
+
+
 }
