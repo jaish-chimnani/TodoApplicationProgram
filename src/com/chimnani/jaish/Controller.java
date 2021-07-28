@@ -4,12 +4,15 @@ import com.chimnani.jaish.datamodels.TodoData;
 import com.chimnani.jaish.datamodels.TodoItem;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.paint.Color;
 import javafx.util.Callback;
@@ -21,7 +24,7 @@ import java.util.List;
 import java.util.Optional;
 
 public class Controller {
-    private List<TodoItem> todoList;
+    private ObservableList<TodoItem> todoList;
     @FXML
     private ListView<TodoItem> todoListView;
 
@@ -55,7 +58,7 @@ public class Controller {
         if (result.isPresent() && result.get()==ButtonType.OK){
             DialogController dialogController=fxmlLoader.getController();
             TodoItem newItem=dialogController.processResult();
-            todoListView.getItems().setAll(TodoData.getInstance().getTodoItems());
+//            todoListView.getItems().setAll(TodoData.getInstance().getTodoItems());
             todoListView.getSelectionModel().select(newItem);
         }
         if (result.isPresent() && result.get()==ButtonType.CANCEL){
@@ -76,7 +79,6 @@ public class Controller {
             }
         });
         contextMenu.getItems().addAll(deleteMenuItem);
-        this.todoList = new ArrayList<>();
         todoListView.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<TodoItem>() {
             @Override
             public void changed(ObservableValue<? extends TodoItem> observableValue, TodoItem todoItem, TodoItem t1) {
@@ -88,7 +90,7 @@ public class Controller {
             }
         });
 
-        todoListView.getItems().addAll(TodoData.getInstance().getTodoItems());
+        todoListView.setItems(TodoData.getInstance().getTodoItems());
         todoListView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
         todoListView.getSelectionModel().selectFirst(); // when the program will be initialized the first option will be of default type! ty.
 
@@ -135,9 +137,18 @@ public class Controller {
         if(result.isPresent() && result.get()==ButtonType.OK){
             TodoData.getInstance().deleteTodoItem(todoItem);
         }
-
+       // todoListView.getItems().setAll(TodoData.getInstance().getTodoItems());
     }
 
+    @FXML
+    public void handleKeyPressed(KeyEvent keyEvent){
+        TodoItem todoItem=todoListView.getSelectionModel().getSelectedItem();
+        if (todoItem!=null){
+            if (keyEvent.getCode().equals(KeyCode.DELETE)){
+                deleteItem(todoItem);
+            }
+        }
+    }
     @FXML
     public void handleClicklistner() {
         TodoItem todoItem = todoListView.getSelectionModel().getSelectedItem();

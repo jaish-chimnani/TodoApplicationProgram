@@ -9,6 +9,11 @@
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.SeparatorMenuItem?>
+<?import javafx.scene.control.ToolBar?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.control.Tooltip?>
 <BorderPane fx:id="mainWindowPane" fx:controller="com.chimnani.jaish.Controller"
             xmlns:fx="http://javafx.com/fxml">
     <top>
@@ -22,9 +27,23 @@
                 </items>
             </Menu>
         </MenuBar>
+        <ToolBar>
+            <HBox>
+                <Button  onAction="#showNewItemDialog">
+                    <tooltip>
+                        <Tooltip text="Add a new Todo Item"/>
+                    </tooltip>
+                    <graphic>
+                        <ImageView>
+                            <Image url="@/toolbarButtonGraphics/general/New24.gif"></Image>
+                        </ImageView>
+                    </graphic>
+                </Button>
+            </HBox>
+        </ToolBar>
     </top>
     <left>
-        <ListView fx:id="todoListView">
+        <ListView fx:id="todoListView" onKeyPressed="#handleKeyPressed">
 
         </ListView>
     </left>
