@@ -14,9 +14,11 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.control.ToggleButton?>
 <BorderPane fx:id="mainWindowPane" fx:controller="com.chimnani.jaish.Controller"
             xmlns:fx="http://javafx.com/fxml">
     <top>
+        <VBox>
         <MenuBar>
             <Menu text="File">
                 <items>
@@ -39,8 +41,14 @@
                         </ImageView>
                     </graphic>
                 </Button>
+                <ToggleButton fx:id="filterToggleButton" text="Today's Items"  onAction="#handleFilterButton">
+                    <tooltip>
+                        <Tooltip text="Show Today's Items"/>
+                    </tooltip>
+                </ToggleButton>
             </HBox>
         </ToolBar>
+    </VBox>
     </top>
     <left>
         <ListView fx:id="todoListView" onKeyPressed="#handleKeyPressed">

@@ -5,6 +5,8 @@ import com.chimnani.jaish.datamodels.TodoItem;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
+import javafx.collections.transformation.SortedList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -20,8 +22,10 @@ import javafx.util.Callback;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 public class Controller {
     private ObservableList<TodoItem> todoList;
@@ -37,6 +41,31 @@ public class Controller {
 
     @FXML
     private BorderPane mainWindowPane;
+
+    @FXML
+    private ToggleButton filterToggleButton;
+    private Predicate<TodoItem> todaysItems;
+    private Predicate<TodoItem> allItems;
+    private FilteredList<TodoItem> filteredList;
+    @FXML
+    public void handleFilterButton(){
+        TodoItem selectedItem=todoListView.getSelectionModel().getSelectedItem();
+        if(filterToggleButton.isSelected()){
+            filteredList.setPredicate(todaysItems);
+            if (filteredList.isEmpty()){
+                textArea1.clear();
+                label1.setText("");
+            }else if (filteredList.contains(selectedItem)){
+                todoListView.getSelectionModel().select(selectedItem);
+            }else {
+                todoListView.getSelectionModel().selectFirst();
+            }
+        }
+        else {
+            filteredList.setPredicate(allItems);
+            todoListView.getSelectionModel().select(selectedItem);
+        }
+    }
 
     @FXML
     public void showNewItemDialog () {
@@ -89,8 +118,27 @@ public class Controller {
                 }
             }
         });
+        allItems=new Predicate<TodoItem>() {
+            @Override
+            public boolean test(TodoItem todoItem) {
+                return true;
+            }
+        };
+        todaysItems=new Predicate<TodoItem>() {
+            @Override
+            public boolean test(TodoItem todoItem) {
+                return (todoItem.getDeadline().equals(LocalDate.now()));
+            }
+        };
+        filteredList=new FilteredList<TodoItem>(TodoData.getInstance().getTodoItems(), allItems);
+        SortedList<TodoItem> itemSortedList=new SortedList<TodoItem>(filteredList, new Comparator<TodoItem>() {
+            @Override
+            public int compare(TodoItem o1, TodoItem o2) {
+                return o1.getDeadline().compareTo(o2.getDeadline());
+            }
+        });
 
-        todoListView.setItems(TodoData.getInstance().getTodoItems());
+        todoListView.setItems(itemSortedList);
         todoListView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
         todoListView.getSelectionModel().selectFirst(); // when the program will be initialized the first option will be of default type! ty.
 
